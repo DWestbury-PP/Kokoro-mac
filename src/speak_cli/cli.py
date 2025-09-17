@@ -22,13 +22,13 @@ LANG_CODES = {
 }
 
 
-def synth_results(text: str, lang: str, voice: str, speed: float):
+def synth_results(text: str, lang: str, voice: str, speed: float, repo_id: str | None = None):
     """Yield Kokoro synthesis results using the upstream KPipeline."""
     from kokoro import KPipeline  # type: ignore
 
     if not voice.startswith(lang):
         print(f"[warn] Voice '{voice}' may not match language '{lang}'.", file=sys.stderr)
-    pipeline = KPipeline(lang_code=lang)
+    pipeline = KPipeline(lang_code=lang, repo_id=repo_id)
     yield from pipeline(text, voice=voice, speed=speed, split_pattern=r"\n+")
 
 
@@ -92,6 +92,11 @@ def main(argv: Optional[list[str]] = None) -> None:
         help="Output WAV path (default: out.wav)",
     )
     parser.add_argument(
+        "--repo-id",
+        default=None,
+        help="Hugging Face repo id (default: hexgrad/Kokoro-82M)",
+    )
+    parser.add_argument(
         "--play",
         action="store_true",
         help="Play the WAV after synthesis using macOS 'afplay'",
@@ -104,7 +109,7 @@ def main(argv: Optional[list[str]] = None) -> None:
             f"Cannot infer language from voice '{args.voice}'. Supply --language one of {sorted(LANG_CODES)}"
         )
 
-    frames = synth_results(args.text, lang=lang, voice=args.voice, speed=args.speed)
+    frames = synth_results(args.text, lang=lang, voice=args.voice, speed=args.speed, repo_id=args.repo_id)
     write_wav(args.out, frames)
     print(f"Wrote: {args.out}")
     if args.play:
