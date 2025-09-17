@@ -3,7 +3,7 @@ VENV := .venv
 PYBIN := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 
-.PHONY: venv install synth
+.PHONY: venv install synth simpler-install-cli dev-reinstall install-copy prefetch run
 
 venv: $(PYBIN)
 $(PYBIN):
@@ -17,8 +17,16 @@ install: venv
 simpler-install-cli: venv
 	$(PIP) install -e . --no-deps
 
+dev-reinstall: venv
+	$(PIP) install -e . --no-deps
+
+install-copy: venv
+	$(PIP) install . --no-deps
+
 prefetch:
 	HF_HOME="$(PWD)/.hf_cache" $(VENV)/bin/python scripts/prefetch_kokoro.py
 
-synth:
-	$(VENV)/bin/speak -v af_heart --play "Hello from Kokoro on Apple Silicon"
+run:
+	$(VENV)/bin/speak -v af_heart "Hello from Kokoro on Apple Silicon"
+
+synth: run

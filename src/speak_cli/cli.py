@@ -1,4 +1,6 @@
 import argparse
+import os
+import warnings
 import shutil
 import subprocess
 import sys
@@ -91,17 +93,49 @@ def main(argv: Optional[list[str]] = None) -> None:
         default=Path("out.wav"),
         help="Output WAV path (default: out.wav)",
     )
+    default_repo = os.environ.get("KOKORO_REPO", "hexgrad/Kokoro-82M")
     parser.add_argument(
         "--repo-id",
-        default=None,
-        help="Hugging Face repo id (default: hexgrad/Kokoro-82M)",
+        default=default_repo,
+        help=f"Hugging Face repo id (default: {default_repo})",
     )
+    # Quiet by default; allow opt-out with --no-quiet
     parser.add_argument(
-        "--play",
-        action="store_true",
-        help="Play the WAV after synthesis using macOS 'afplay'",
+        "--no-quiet",
+        dest="quiet",
+        action="store_false",
+        help="Show non-critical warnings (torch RNN dropout, weight_norm deprecation)",
     )
+    parser.set_defaults(quiet=True)
+    parser.add_argument(
+        "--print-path",
+        action="store_true",
+        help="Print the output WAV path after synthesis",
+    )
+    # Play by default; allow opt-out with --no-play
+    parser.add_argument(
+        "--no-play",
+        dest="play",
+        action="store_false",
+        help="Do not play the WAV after synthesis",
+    )
+    parser.set_defaults(play=True)
     args = parser.parse_args(argv)
+
+    if args.quiet:
+        # Suppress common, non-actionable warnings from upstream deps
+        warnings.filterwarnings(
+            "ignore",
+            message=r"dropout option adds dropout.*num_layers greater than 1",
+            category=UserWarning,
+            module=r"torch\.nn\.modules\.rnn",
+        )
+        warnings.filterwarnings(
+            "ignore",
+            message=r"`torch\.nn\.utils\.weight_norm` is deprecated",
+            category=FutureWarning,
+            module=r"torch\.nn\.utils\.weight_norm",
+        )
 
     lang = args.language or args.voice[:1]
     if lang not in LANG_CODES:
@@ -111,7 +145,8 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     frames = synth_results(args.text, lang=lang, voice=args.voice, speed=args.speed, repo_id=args.repo_id)
     write_wav(args.out, frames)
-    print(f"Wrote: {args.out}")
+    if args.print_path:
+        print(f"Wrote: {args.out}")
     if args.play:
         maybe_play(args.out)
 
