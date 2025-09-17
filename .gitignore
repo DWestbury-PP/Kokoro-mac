@@ -17,3 +17,10 @@ checkpoints/
 data/
 _upstream_kokoro/
 .hf_cache/
+*.pt
+*.pth
+*.onnx
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.python-version
