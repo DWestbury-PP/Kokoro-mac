@@ -14,6 +14,8 @@ install: venv
 	$(PIP) install -e .
 	$(PIP) install kokoro
 
+simpler-install-cli: venv
+	$(PIP) install -e . --no-deps
+
 synth:
 	$(VENV)/bin/speak -v af_heart --play "Hello from Kokoro on Apple Silicon"
-
