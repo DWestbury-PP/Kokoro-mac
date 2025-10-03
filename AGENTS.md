@@ -10,7 +10,7 @@
 ## Build, Test, and Development Commands
 - `python3 -m venv .venv && source .venv/bin/activate`: Create/activate Apple Silicon (arm64) venv.
 - `pip install -e .[dev]`: Install Kokoro and dev tools (ruff/black/pytest/mypy).
-- `pip install torch --index-url https://download.pytorch.org/whl/cpu` or `pip install onnxruntime`: Choose backend (CPU-only).
+- `pip install torch torchvision torchaudio` or `pip install onnxruntime`: Choose backend (MPS-enabled for GPU acceleration).
 - `pytest -q`: Run unit tests. Add `-k <name>` to filter.
 - `speak "Hello, world" --voice af_heart --out out.wav`: Synthesize speech locally.
 - `make setup | make test | make synth`: Prefer if a `Makefile` is present.
@@ -31,10 +31,12 @@
 - **Commits:** Imperative mood; small, focused changes. Conventional Commits welcome (`feat:`, `fix:`, `perf:`).
 - **PRs:** Include a summary, sample command/output (`out.wav` as artifact, not committed), and linked issues. Ensure tests, lint, and format pass.
 
-## Apple Silicon (CPU) Performance Tips
+## Apple Silicon Performance Tips
 - Ensure arm64 Python (not Rosetta): `python -c "import platform;print(platform.machine())"` → `arm64`.
-- Set threads: `export OMP_NUM_THREADS=$(sysctl -n hw.physicalcpu_max)`; optionally `VECLIB_MAXIMUM_THREADS=$OMP_NUM_THREADS`.
-- Batch phoneme sequences; prefer float16 weights where supported by backend even on CPU if safe.
+- **GPU Acceleration**: Use `--device mps` or `--device auto` (default) for Apple Silicon GPU acceleration.
+- **CPU Optimization**: Set threads: `export OMP_NUM_THREADS=$(sysctl -n hw.physicalcpu_max)`; optionally `VECLIB_MAXIMUM_THREADS=$OMP_NUM_THREADS`.
+- Batch phoneme sequences; prefer float16 weights where supported by backend.
+- **Device Selection**: `--device auto` automatically chooses the fastest available device (MPS > CPU).
 
 ## Security & Model Assets
 - Do not commit weights; use Git LFS or scripted downloads into `models/`.

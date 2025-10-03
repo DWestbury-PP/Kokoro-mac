@@ -1,22 +1,24 @@
 # Kokoro Speak Demo
 
-A minimal, CPU‑only Text‑to‑Speech CLI for Apple Silicon built on the Kokoro 82M vocoder‑based model. It installs a `speak` command that reads arbitrary text with selectable voices, plays audio by default, and keeps output quiet and clean.
+A high-performance Text‑to‑Speech CLI for Apple Silicon built on the Kokoro 82M vocoder‑based model. Optimized for Apple Silicon GPUs with MPS acceleration, it installs a `speak` command that reads arbitrary text with selectable voices, plays audio by default, and keeps output quiet and clean.
 
 ## Features
 - Simple CLI: `speak "Your text" -v <voice>`
+- **Apple Silicon GPU acceleration** with MPS (Metal Performance Shaders)
+- **Auto-device detection** - automatically uses GPU when available
 - Voices and languages (e.g., `af_heart`, US English `-l a`)
 - Quiet output by default; audio auto‑plays (use `--no-play` to skip)
 - Optional offline mode using a local HF cache (`.hf_cache`)
 
 ## Requirements
 - macOS on Apple Silicon (arm64), Python 3.11+
-- CPU‑only Torch and Kokoro
+- PyTorch with MPS support and Kokoro
 
 ## Setup
 - Create a venv and install the CLI (non‑editable):
   - `python3.11 -m venv .venv && source .venv/bin/activate`
   - `pip install . --no-deps --no-build-isolation`
-  - Install runtime deps (if not yet installed): `pip install torch kokoro`
+  - Install runtime deps (if not yet installed): `pip install torch torchvision torchaudio kokoro`
 - Optional: prefetch model files into local cache for offline runs:
   - `export HF_HOME="$(pwd)/.hf_cache"`
   - `make prefetch`
@@ -33,6 +35,10 @@ A minimal, CPU‑only Text‑to‑Speech CLI for Apple Silicon built on the Koko
   - `speak --repo-id hexgrad/Kokoro-82M-v1.1-zh -l z -v zf_xxx "你好"`
 - Offline once cached:
   - `HF_HUB_OFFLINE=1 speak -v af_heart "Local cache run"`
+- Device selection:
+  - `speak --device auto "Auto-detect best device"` (default)
+  - `speak --device mps "Force GPU acceleration"`
+  - `speak --device cpu "Force CPU-only"`
 
 Makefile helpers: `make install-copy`, `make run`, `make prefetch`.
 
@@ -63,6 +69,16 @@ After either installation, you can use `speak` globally:
 speak "Hello from anywhere!" --voice af_heart
 speak "Testing voices" --voice am_adam --out ~/Desktop/test.wav --no-play
 ```
+
+## Performance
+
+The tool automatically detects and uses the best available device:
+
+- **Apple Silicon GPU (MPS)**: Optimized for M1/M2/M3 chips with Metal Performance Shaders
+- **CPU fallback**: Uses optimized CPU inference when GPU is unavailable
+- **Auto-detection**: Automatically selects the fastest available option
+
+GPU acceleration provides significant performance improvements for longer texts and batch processing.
 
 ## Available Voices
 The following voices are available in the default Kokoro repository (`hexgrad/Kokoro-82M`). Use with `-v <voice>`; language is inferred from the prefix.

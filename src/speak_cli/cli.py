@@ -24,13 +24,29 @@ LANG_CODES = {
 }
 
 
-def synth_results(text: str, lang: str, voice: str, speed: float, repo_id: str | None = None):
+def synth_results(text: str, lang: str, voice: str, speed: float, repo_id: str | None = None, device: str = "auto"):
     """Yield Kokoro synthesis results using the upstream KPipeline."""
+    import torch
     from kokoro import KPipeline  # type: ignore
+
+    # Auto-detect best device if not specified
+    if device == "auto":
+        if torch.backends.mps.is_available():
+            device = "mps"
+            print(f"[info] Using Apple Silicon GPU (MPS) for acceleration", file=sys.stderr)
+        else:
+            device = "cpu"
+            print(f"[info] Using CPU (MPS not available)", file=sys.stderr)
+    elif device == "mps" and not torch.backends.mps.is_available():
+        print(f"[warn] MPS requested but not available, falling back to CPU", file=sys.stderr)
+        device = "cpu"
+    else:
+        print(f"[info] Using device: {device}", file=sys.stderr)
 
     if not voice.startswith(lang):
         print(f"[warn] Voice '{voice}' may not match language '{lang}'.", file=sys.stderr)
-    pipeline = KPipeline(lang_code=lang, repo_id=repo_id)
+    
+    pipeline = KPipeline(lang_code=lang, repo_id=repo_id, device=device)
     yield from pipeline(text, voice=voice, speed=speed, split_pattern=r"\n+")
 
 
@@ -64,7 +80,7 @@ def maybe_play(path: Path) -> None:
 def main(argv: Optional[list[str]] = None) -> None:
     parser = argparse.ArgumentParser(
         prog="speak",
-        description="Synthesize speech with Kokoro (CPU-only, Apple Silicon)",
+        description="Synthesize speech with Kokoro (Apple Silicon GPU-optimized)",
     )
     parser.add_argument("text", help="Quoted text to speak")
     parser.add_argument(
@@ -98,6 +114,12 @@ def main(argv: Optional[list[str]] = None) -> None:
         "--repo-id",
         default=default_repo,
         help=f"Hugging Face repo id (default: {default_repo})",
+    )
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cpu", "mps"],
+        default="auto",
+        help="Device to use for inference: 'auto' (default, uses MPS if available), 'cpu', or 'mps'",
     )
     # Quiet by default; allow opt-out with --no-quiet
     parser.add_argument(
@@ -143,7 +165,7 @@ def main(argv: Optional[list[str]] = None) -> None:
             f"Cannot infer language from voice '{args.voice}'. Supply --language one of {sorted(LANG_CODES)}"
         )
 
-    frames = synth_results(args.text, lang=lang, voice=args.voice, speed=args.speed, repo_id=args.repo_id)
+    frames = synth_results(args.text, lang=lang, voice=args.voice, speed=args.speed, repo_id=args.repo_id, device=args.device)
     write_wav(args.out, frames)
     if args.print_path:
         print(f"Wrote: {args.out}")
