@@ -36,6 +36,34 @@ A minimal, CPU‑only Text‑to‑Speech CLI for Apple Silicon built on the Koko
 
 Makefile helpers: `make install-copy`, `make run`, `make prefetch`.
 
+## System-Wide Installation (Optional)
+
+For convenient access to the `speak` command from anywhere in your terminal without needing to navigate to this directory or activate the virtual environment:
+
+### Option 1: Global System Command (Recommended)
+```bash
+./install_global_speak.sh
+```
+- Creates `/usr/local/bin/speak` that works from any directory
+- Automatically handles virtual environment activation
+- Requires sudo for installation
+- Most seamless "set and forget" experience
+
+### Option 2: Shell Alias
+```bash
+./setup_shell_alias.sh
+```
+- Adds an alias to your `~/.zshrc`
+- Works from any directory after shell restart (`source ~/.zshrc`)
+- No sudo required
+- Requires terminal restart or manual sourcing
+
+After either installation, you can use `speak` globally:
+```bash
+speak "Hello from anywhere!" --voice af_heart
+speak "Testing voices" --voice am_adam --out ~/Desktop/test.wav --no-play
+```
+
 ## Available Voices
 The following voices are available in the default Kokoro repository (`hexgrad/Kokoro-82M`). Use with `-v <voice>`; language is inferred from the prefix.
 

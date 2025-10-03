@@ -12,7 +12,7 @@
 - `pip install -e .[dev]`: Install Kokoro and dev tools (ruff/black/pytest/mypy).
 - `pip install torch --index-url https://download.pytorch.org/whl/cpu` or `pip install onnxruntime`: Choose backend (CPU-only).
 - `pytest -q`: Run unit tests. Add `-k <name>` to filter.
-- `python -m kokoro.cli --text "Hello, world" --voice en_US/neutral --out out.wav`: Synthesize speech locally.
+- `speak "Hello, world" --voice af_heart --out out.wav`: Synthesize speech locally.
 - `make setup | make test | make synth`: Prefer if a `Makefile` is present.
 
 ## Coding Style & Naming Conventions
