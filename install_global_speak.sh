@@ -9,9 +9,7 @@ sudo tee "$WRAPPER_SCRIPT" > /dev/null << 'EOF'
 #!/bin/bash
 # Global wrapper for Kokoro speak command
 KOKORO_PATH="/Users/dwestbury/Documents/Source Code/Kokoro-Mac"
-cd "$KOKORO_PATH"
-source .venv/bin/activate
-exec python -m speak_cli.cli "$@"
+exec "$KOKORO_PATH/.venv/bin/speak" "$@"
 EOF
 
 # Make it executable

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source /Users/dwestbury/Documents/Source Code/Kokoro-Mac/.venv/bin/activate)",
+      "Bash(chmod:*)",
+      "Bash(sudo cp:*)",
+      "Bash(/Users/dwestbury/Documents/Source\\\\ Code/Kokoro-Mac/.venv/bin/speak:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(pip uninstall:*)",
+      "Bash(pip install:*)",
+      "Bash(pip:*)"
+    ]
+  }
+}

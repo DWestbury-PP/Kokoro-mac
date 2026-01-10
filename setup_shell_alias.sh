@@ -5,7 +5,7 @@ KOKORO_PATH="/Users/dwestbury/Documents/Source Code/Kokoro-Mac"
 SHELL_RC="$HOME/.zshrc"
 
 # Create the alias
-ALIAS_LINE="alias speak='cd \"$KOKORO_PATH\" && source .venv/bin/activate && python -m speak_cli.cli'"
+ALIAS_LINE="alias speak='\"$KOKORO_PATH/.venv/bin/speak\"'"
 
 # Check if alias already exists
 if grep -q "alias speak=" "$SHELL_RC" 2>/dev/null; then

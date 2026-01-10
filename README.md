@@ -15,10 +15,9 @@ A high-performance Text‑to‑Speech CLI for Apple Silicon built on the Kokoro 
 - PyTorch with MPS support and Kokoro
 
 ## Setup
-- Create a venv and install the CLI (non‑editable):
+- Create a venv and install the CLI in editable mode:
   - `python3.11 -m venv .venv && source .venv/bin/activate`
-  - `pip install . --no-deps --no-build-isolation`
-  - Install runtime deps (if not yet installed): `pip install torch torchvision torchaudio kokoro`
+  - `pip install -e .`
 - Optional: prefetch model files into local cache for offline runs:
   - `export HF_HOME="$(pwd)/.hf_cache"`
   - `make prefetch`
