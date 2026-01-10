@@ -4,6 +4,7 @@ A high-performance Text‑to‑Speech CLI for Apple Silicon built on the Kokoro 
 
 ## Features
 - Simple CLI: `speak "Your text" -v <voice>`
+- **Command pipe support** - pipe text from other commands or files
 - **Apple Silicon GPU acceleration** with MPS (Metal Performance Shaders)
 - **Auto-device detection** - automatically uses GPU when available
 - Voices and languages (e.g., `af_heart`, US English `-l a`)
@@ -25,6 +26,11 @@ A high-performance Text‑to‑Speech CLI for Apple Silicon built on the Kokoro 
 ## Usage
 - Basic (playback + quiet by default):
   - `speak -v af_heart "Hello from Kokoro"`
+- **Piped input from commands or files:**
+  - `echo "Hello world" | speak -v af_heart`
+  - `cat article.txt | speak -v am_adam --no-play --out article.wav`
+  - `fortune | speak -v af_bella`
+  - `pbpaste | speak -v af_sky` (speak clipboard contents on macOS)
 - Show output file path:
   - `speak --print-path -v af_heart "Hello"` → writes `out.wav`
 - Skip playback:
@@ -67,6 +73,8 @@ After either installation, you can use `speak` globally:
 ```bash
 speak "Hello from anywhere!" --voice af_heart
 speak "Testing voices" --voice am_adam --out ~/Desktop/test.wav --no-play
+echo "Piped text works too" | speak --voice af_bella
+cat ~/Documents/book.txt | speak --voice am_liam --no-play --out ~/audiobook.wav
 ```
 
 ## Performance
