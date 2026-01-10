@@ -8,7 +8,10 @@
       "Bash(source .venv/bin/activate)",
       "Bash(pip uninstall:*)",
       "Bash(pip install:*)",
-      "Bash(pip:*)"
+      "Bash(pip:*)",
+      "Bash(.venv/bin/pip:*)",
+      "Bash(.venv/bin/speak:*)",
+      "Bash(speak --no-play)"
     ]
   }
 }

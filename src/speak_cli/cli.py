@@ -82,7 +82,7 @@ def main(argv: Optional[list[str]] = None) -> None:
         prog="speak",
         description="Synthesize speech with Kokoro (Apple Silicon GPU-optimized)",
     )
-    parser.add_argument("text", help="Quoted text to speak")
+    parser.add_argument("text", nargs='?', help="Quoted text to speak (or read from stdin if piped)")
     parser.add_argument(
         "-v",
         "--voice",
@@ -143,6 +143,13 @@ def main(argv: Optional[list[str]] = None) -> None:
     )
     parser.set_defaults(play=True)
     args = parser.parse_args(argv)
+
+    # Read from stdin if no text argument provided (piped input)
+    if args.text is None:
+        if not sys.stdin.isatty():
+            args.text = sys.stdin.read().strip()
+        else:
+            parser.error("No text provided. Either provide text as an argument or pipe it via stdin.")
 
     if args.quiet:
         # Suppress common, non-actionable warnings from upstream deps
