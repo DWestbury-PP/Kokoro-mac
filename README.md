@@ -23,6 +23,41 @@ A high-performance Text‑to‑Speech CLI for Apple Silicon built on the Kokoro 
   - `export HF_HOME="$(pwd)/.hf_cache"`
   - `make prefetch`
 
+> **iCloud / synced-folder users:** if the repo lives under `~/Documents` or `~/Desktop`
+> with iCloud Drive enabled, prefer a **copy install** over editable — see Troubleshooting.
+
+## Troubleshooting
+
+### `ModuleNotFoundError: No module named 'speak_cli'`
+This usually means the editable install's `.pth` link is being ignored by Python, **not** that
+anything is wrong with the code.
+
+**Why it happens:** modern CPython (3.11.13+, 3.12+) hardened `site.py` to silently skip `.pth`
+files that carry the macOS **hidden** filesystem flag. iCloud Drive (and some backup/sync tools)
+likes to set that flag on files inside synced folders such as `~/Documents` — including the
+editable-install `.pth` in your `.venv`. Once it's hidden, the `speak_cli` package becomes
+invisible and the `speak` entry point can't import it.
+
+**Diagnose:**
+```bash
+ls -lO .venv/lib/python3.11/site-packages/*.pth        # a "hidden" flag is the culprit
+python -v -c pass 2>&1 | grep -i "skipping hidden"     # CPython tells you it skipped them
+```
+
+**Fix (recommended — install by copy, no `.pth` to hide):**
+```bash
+pip uninstall -y kokoro-speak-demo
+pip install . --no-deps      # or: make install-copy
+```
+The package is copied straight into `site-packages`, so there's nothing for iCloud to hide.
+Trade-off: edits to `src/` require re-running the install to take effect.
+
+**Quick fix (keep editable install):**
+```bash
+chflags nohidden .venv/lib/python3.11/site-packages/*.pth
+```
+This works immediately but can recur if the sync service re-hides the file.
+
 ## Usage
 - Basic (playback + quiet by default):
   - `speak -v af_heart "Hello from Kokoro"`
